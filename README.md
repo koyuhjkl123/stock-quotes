@@ -44,7 +44,7 @@
 ## 사용자 기능 구현
 
 * 비회원 이용자 이메일 인증
-<details>
+  * <details>
     <summary>코드 보기</summary>
 
 ```java
