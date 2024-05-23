@@ -256,6 +256,7 @@ while (true) { // 5번 선택 시 끝남
 ```
 </details>
 * 특정 날짜 검색
+
 <details>
     <summary>코드 보기</summary>
 
@@ -286,6 +287,7 @@ while (true) { // 5번 선택 시 끝남
 	}
 ```
 </details>
+
 * 시가총액 검색
 <details>
     <summary>코드 보기</summary>
@@ -344,6 +346,7 @@ while (true) { // 5번 선택 시 끝남
 
 ```
 </details>
+
 * 거래량 검색
 <details>
     <summary>코드 보기</summary>
