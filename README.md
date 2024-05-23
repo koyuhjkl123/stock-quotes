@@ -175,7 +175,135 @@
 
 | 종목명 검색 | 특정 날짜 검색 | 시가총액 검색 | 거래량 검색 |
 | --- | --- | --- | --- |
-| <details> <summary>코드 보기</summary> <pre><code> while (true) { // 5번 선택 시 끝남 System.out.println("----------- 주식시세정보 (-검색-) --------"); System.out.println("1. 종목명 검색 2. 특정 날짜 검색 3. 시가총액 검색 4. 거래량 검색 5. 검색 종료"); int user_select = sc.nextInt(); if (user_select == 1) { System.out.println("---------- 종목명(-검색-)을 선택하셨습니다! --------"); System.out.println("종목명을 입력하세요 : "); String itmsnm_name = sc.next(); UserItmsNmsSelect(itmsnm_name); } else if (user_select == 2) { System.out.println("---------- " + "특정 날짜 검색 " + "(-전체검색-) ----------"); System.out.println("날짜 : 2023년 12월 4일 ~ 2023년 12월 28일"); System.out.println("날짜 입력 양식 예시 : 20231212"); System.out.println("날짜 입력 시 보여주는 종목 수 : 100개"); String date = sc.next(); UserSelectDate(date); } else if (user_select == 3) { System.out.println("---------- " + "시가총액 순위 " + "(-시가총액 검색-) ----------"); System.out.println("----- 원하시는 시가총액 정보를 입력하세요 -----"); System.out.println("1. 시가총액 높은 순 2. 시가총액 낮은 순"); int user_mt = sc.nextInt(); sc.nextLine(); System.out.println("1. 10위내 2. 50위내 3. 100위내"); int user_mt_rank = sc.nextInt(); UserSelectMrkttotamt(user_mt, user_mt_rank); } else if (user_select == 4) { System.out.println("---------- 거래량 검색 (--검색--) ----------"); System.out.println("--------- 원하시는 거래량 정보를 입력하세요"); System.out.println("1. 거래량 높은 순 2. 거래량 낮은 순"); int user_trqu = sc.nextInt(); sc.nextLine(); System.out.println("1. 10위내 2. 50위내 3. 100위내"); int user_trqu_rank = sc.nextInt(); UserSelectTrqu(user_trqu, user_trqu_rank); } else if (user_select == 5) { System.out.println("해당 검색을 종료하시겠습니까?"); System.out.println("1. 네 | 2. 아니요"); int user_select_end = sc.nextInt(); if (user_select_end == 1) { System.out.println("검색창을 종료하였습니다."); break; } else if (user_select_end == 2) { System.out.println("처음 선택지로 넘어갑니다."); continue; } </code></pre> </details> | <details> <summary>코드 보기</summary> <pre><code> // 특정 날짜 검색 코드 // 예시 System.out.println("특정 날짜를 입력하세요: "); String date = sc.next(); UserSelectDate(date); </code></pre> </details> | <details> <summary>코드 보기</summary> <pre><code> // 시가총액 검색 코드 // 예시 System.out.println("시가총액 순위를 선택하세요: "); int user_mt = sc.nextInt(); System.out.println("1. 10위내 2. 50위내 3. 100위내"); int user_mt_rank = sc.nextInt(); UserSelectMrkttotamt(user_mt, user_mt_rank); </code></pre> </details> | <details> <summary>코드 보기</summary> <pre><code> // 거래량 검색 코드 // 예시 System.out.println("거래량 순위를 선택하세요: "); int user_trqu = sc.nextInt(); System.out.println("1. 10위내 2. 50위내 3. 100위내"); int user_trqu_rank = sc.nextInt(); UserSelectTrqu(user_trqu, user_trqu_rank); </code></pre> </details> |
+| @Override
+	public void SqlSelect() {
+		System.out.println("---------- 주식시세정보 ----------");
+		System.out.print("1. 비 회원 이용자  |  2. 관리자");
+		
+		int user = sc.nextInt();
+		if (user == 1) {
+			System.out.println("1회용으로 검색하실 이메일이 필요합니다.");
+			System.out.println("인증하실 이메일 명 :");
+			String email = sc.next();
+			AdminEmail(email); // 해당 메소드의 매개변수 사용자 이메일
+			while (true) { // 5번 선택 시 끝남
+				System.out.println("----------- 주식시세정보 (-검색-) --------");
+				System.out.println("1. 종목명 검색  |  2. 특정 날짜 검색 | 3. 시가총액 검색  | 4. 거래량 검색  | 5. 검색 종료");
+
+				int user_select = sc.nextInt();
+//				sc.nextLine(); // 개행 문자 소비
+				if (user_select == 1) {
+					System.out.println("---------- 종목명(-검색-)을 선택하셨습니다! --------");
+					System.out.println("종목명을 입력하세요 : ");
+					String itmsnm_name = sc.next();
+					UserItmsNmsSelect(itmsnm_name);
+				} else if (user_select == 2) {
+					System.out.println("---------- " + "특정 날짜 검색 " + "(-전체검색-) ----------");
+					System.out.println("날짜 : 2023년 12월 4일 ~ 2023년 12월 28일");
+					System.out.println("날짜 입력 양식 예시 : 20231212");
+					System.out.println("날짜 입력 시 보여주는 종목 수 : 100개");
+					String date = sc.next();
+					UserSelectDate(date);
+				} else if (user_select == 3) {
+					System.out.println("---------- " + "시가총액 순위 " + "(-시가총액 검색-) ----------");
+					System.out.println("----- 원하시는 시가총액 정보를 입력하세요 -----");
+					System.out.println("1. 시가총액 높은 순  2. 시가총액 낮은 순");
+					int user_mt = sc.nextInt();
+					sc.nextLine(); // 개행 문자
+					System.out.println("1. 10위내  2. 50위내  3. 100위내");
+					int user_mt_rank = sc.nextInt();
+					UserSelectMrkttotamt(user_mt, user_mt_rank); // 시가총액 메서드
+
+				} else if (user_select == 4) {
+					System.out.println("---------- 거래량 검색 (--검색--) ----------");
+					System.out.println("--------- 원하시는 거래량 정보를 입력하세요");
+					System.out.println("1. 거래량 높은 순  2. 거래량 낮은 순");
+					int user_trqu = sc.nextInt();
+					sc.nextLine(); // 개행 문자
+					System.out.println("1. 10위내  2. 50위내  3. 100위내");
+					int user_trqu_rank = sc.nextInt();
+					UserSelectTrqu(user_trqu, user_trqu_rank); // 거래량 메서드
+				} else if (user_select == 5) {
+					System.out.println("해당 검색을 종료하시겠습니까?");
+					System.out.println("1. 네  |  2. 아니요");
+					int user_select_end = sc.nextInt();
+
+					if (user_select_end == 1) {
+						System.out.println("검색창을 종료하였습니다.");
+						break;
+					} else if (user_select_end == 2) {
+						System.out.println("처음 선택지로 넘어갑니다.");
+						continue;
+					}
+				}
+
+			} // User 사용자 끝
+//			관리자 권한
+		} else if (user == 2) {
+			String userid_is = ""; // 아이디 입력
+			String pwd_is = ""; // 비밀번호 입력
+			System.out.println("---------- 주식 시세정보(관리자) ----------");
+
+			boolean admin_login = false;
+
+			for (int i = 0; i < 5;) {
+				System.out.print("아이디를 입력하세요 : ");
+				userid_is = sc.next(); // 아이디 입력
+
+				System.out.print("비밀번호를 입력하세요 : ");
+				pwd_is = sc.next(); // 비밀번호 입력
+				if ((userid_is.equals(getUserid())) && (pwd_is.equals(getPwd()))) {
+					System.out.println("관리자님 로그인 하셨습니다.");
+					admin_login = true; // 관리자가 로그인을 성공하면 true
+					break;
+				} else {
+					System.out.println("로그인이 실패하셨습니다.");
+					continue;
+				}
+			}
+
+			while (admin_login) {
+				try {
+					int admin_number;
+
+					System.out.println("---------- 관리자 주식 시세정보 ----------");
+					System.out.println("1. 추가하기  2. 수정하기  3. 삭제하기  4. 검색하기  5. 로그아웃");
+					sc.nextLine();
+					admin_number = sc.nextInt(); // 관리자 선택
+
+					if (admin_number == 1) {
+						AdminInsert(); // 추가하기
+					} else if (admin_number == 2) {
+						AdminUdate(); // 수정하기
+					} else if (admin_number == 3) {
+						AdminDelete(); // 삭제하기
+					} else if (admin_number == 4) {
+						AdminSelect(); // 검색하기
+					} else if (admin_number == 5) {
+						System.out.println("로그아웃 하시겠습니까?");
+						System.out.println("1. 네  2. 아니요");
+//						관리자 로그아웃 재 확인
+						int admin_logout_number = sc.nextInt();
+						if (admin_logout_number == 1) {
+							System.out.println("로그아웃하였습니다.");
+							break;
+						} else if (admin_logout_number == 2) {
+							System.out.println("처음으로 다시 돌아갑니다.");
+							continue;
+						} else {
+							System.out.println("잘못된 값을 입력하셨습니다.");
+							continue;
+						}
+					} // admin_number 선택 5번 끝
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.out.println("로그인 정보가 틀렸습니다.");
+					continue;
+				} // try catch문 끝
+			} // while 끝
+		} // 관리자 2번 끝나는 행
+	} |
 
 | <details>
     <summary>코드 보기</summary>
