@@ -175,7 +175,7 @@
 
 | 종목명 검색 | 특정 날짜 검색 | 시가총액 검색 | 거래량 검색 |
 | --- | --- | --- | --- |
-| <details>
+<details>
     <summary>코드 보기</summary>
 
 ```java
@@ -309,11 +309,11 @@
 		} // 관리자 2번 끝나는 행
 	}
 ```
-</details> |
+</details>
 
 
 
-| <details>
+<details>
     <summary>코드 보기</summary>
 	
 ```java
@@ -347,7 +347,7 @@
 
 	}
 ```
-</details> |
+</details>
 
 * 특정 날짜 검색
 
@@ -380,7 +380,7 @@
 		}
 	}
 ```
-</details> |
+</details>
 
 * 시가총액 검색
 <details>
@@ -439,7 +439,7 @@
 	}
 
 ```
-</details> |
+</details>
 
 * 거래량 검색
 <details>
@@ -498,7 +498,7 @@
 
 	}
 ```
-</details> |
+</details>
 
 * 시가 총액과 거래량 기준 구분
 
