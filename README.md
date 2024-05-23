@@ -255,6 +255,7 @@ while (true) { // 5번 선택 시 끝남
 	}
 ```
 </details>
+
 * 특정 날짜 검색
 
 <details>
