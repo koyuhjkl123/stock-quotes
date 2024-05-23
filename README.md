@@ -307,9 +307,9 @@
 				} // try catch문 끝
 			} // while 끝
 		} // 관리자 2번 끝나는 행
-	} |
+	}
 ```
-</details>
+</details> |
 
 
 
