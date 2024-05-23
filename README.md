@@ -26,7 +26,8 @@
 <details>
     <summary>WBS</summary>
 
-![image](https://github.com/koyuhjkl123/stock-quotes/assets/94844952/8c3ebe57-b575-4ee1-aeea-5e5959326be0)
+![image](https://github.com/koyuhjkl123/stock-quotes/assets/94844952/9e91501c-da59-407f-99f2-4d662c619153)
+
 
 </details>
 
@@ -36,6 +37,14 @@
 
 
 ![image](https://github.com/koyuhjkl123/stock-quotes/assets/94844952/969041e2-ca6f-4dd7-b769-dc1a2bb7740f)
+
+</details>
+
+## ERD 설계
+<details>
+    <summary>ERD</summary>
+
+![image](https://github.com/koyuhjkl123/stock-quotes/assets/94844952/753e50e5-a5aa-44e0-ad76-97c146e2b628)
 
 </details>
 
