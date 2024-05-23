@@ -220,6 +220,225 @@ while (true) { // 5번 선택 시 끝남
 </details>
 
   * 종목명 검색
+<details>
+    <summary>코드 보기</summary>
+	
+```java
+@Override
+//	유저가 종목명 검색
+	public void UserItmsNmsSelect(String itmsNms_name) {
+
+		Statement stmt;
+//		시가 총액을 1억단위로 나눈 값을 추출 하고 날짜는 오름차순으로 지정
+//		TRIM : 공백 제거
+		String sql = "SELECT basDt, clpr, vs, fltRt, mkp, hipr, lopr, trqu, cast(cast(mrktTotAmt as signed) / 100000000 as signed) "
+				+ "FROM stock1 WHERE TRIM(itmsNm) like ? order by basDt ASC";
+		try {
+			PreparedStatement pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, itmsNms_name);
+			ResultSet rs = pstmt.executeQuery();
+
+			if (!(rs.next())) {
+				System.out.println();
+				System.out.println("입력하신 종목명은 존재하지 않습니다.");
+			} else {
+				System.out.printf("%-20s %-12s %-8s %-9s %-9s %-9s %-9s %-9s %-15s\n", "날짜", "종가", "대비", "등락률", "시가",
+						"고가", "저가", "거래량", "시가총액");
+				SelectUser(rs); // 출력메소드
+			}
+
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+```
+</details>
   * 특정 날짜 검색
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void UserSelectDate(String date) {
+//		2. 특정 날짜 검색을 하기 위한 메서드
+
+		String sql = "select itmsNm, clpr, vs, fltRt, mkp, hipr, lopr, trqu, cast(cast(mrktTotAmt as signed) / 100000000 as signed) from stock1 where basDt = '"
+				+ date + "' limit 100";
+
+		Statement stmt;
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+
+			if (!(rs.next())) {
+				System.out.println();
+				System.out.println("입력된 날짜가 틀렸습니다. 다시 입력하시길 바랍니다");
+			} else {
+				System.out.printf("  종목명 \t 종가 \t 대비 \t 등락률 \t 시가 \t 고가 \t 저가 \t  거래량 \t 시가총액\n");
+				SelectUser(rs);
+			}
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+```
+</details>
   * 시가총액 검색
+<details>
+    <summary>코드 보기</summary>
+
+```
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->@Override
+	public void UserSelectMrkttotamt(int order, int rank) {
+//		시가 총액 순위 메서드
+//		1. 시가 총액 높은 순 2. 시가 총액 낮은 순
+//		"1. 10위내  2. 50위내  3. 100위내"
+		String order_by = "";
+		String max_is = "";
+		int limit = 0;
+		if (order == 1) {
+			order_by = "desc";
+			max_is = "Max";
+		} else if (order == 2) {
+			order_by = "ASC";
+			max_is = "Min";
+		} else {
+			System.out.println("잘못 입력하셨습니다.");
+		}
+		if (rank == 1) {
+			limit = 10;
+		} else if (rank == 2) {
+			limit = 50;
+		} else if (rank == 3) {
+			limit = 100;
+		} else {
+			System.out.println("잘못입력하셨습니다.");
+		}
+
+		String sql = "SELECT itmsNm, basDt,vs,fltRt,mkp,hipr,lopr,trqu, "
+				+ "cast("+max_is+"(CAST(mrktTotAmt AS SIGNED)) / 100000000 as signed) AS min_mrktTotAmt FROM stock1 "
+				+ "GROUP BY itmsNm, basDt, vs, fltRt, mkp, hipr, lopr, trqu ORDER BY min_mrktTotAmt "+order_by+"  limit "+limit+"";
+
+		Statement stmt;
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+
+			System.out.printf("%-22s %-9s %-9s %-9s %-9s %-9s %-9s\t %-9s \t %-8s \n", "종목명", "날짜",  "대비", "등락률", "시가",
+					"고가", "저가", "거래량", "시가총액");
+
+			while (rs.next()) {
+
+				SelectUser(rs);
+			}
+
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+```
+</details>
   * 거래량 검색
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void UserSelectTrqu(int order, int rank) {
+//		4. 거래량 검색 기능 메서드
+//		매개변수1 : number -> 1. 거래량 높은 순  2. 거래량 낮은 순
+//		매개변수2 : rank  -> 1. 10위내,  2. 50위내  3. 100위내 
+
+		String Max_Min = ""; // 최대값, 최소값
+		String Order_by = ""; // 오름차순, 내림차순
+		int limit_rank_number = 0; // rank 몇위까지 보여줄것인가
+		int number_rank = 0; // 10, 50, 100 순위 내에 입력
+
+//		오름차순, 내림차순 결정
+		if (order == 1) {
+			Order_by = "desc";
+			Max_Min = "MAX";
+		} else if (order == 2) {
+			Order_by = "asc";
+			Max_Min = "MIN";
+		} else {
+			System.out.println("잘못 입력하셨습니다.");
+		}
+//		limit의 순위 결정
+		if (rank == 1) {
+			limit_rank_number = 10;
+		} else if (rank == 2) {
+			limit_rank_number = 50;
+		} else if (rank == 3) {
+			limit_rank_number = 100;
+		}
+
+		String sql = "select itmsNm, basDt,vs,fltRt,mkp,hipr,lopr, " + Max_Min + "(cast(trqu as signed)) as max_trqu, "
+				+ "cast("+Max_Min+"(CAST(mrktTotAmt AS SIGNED)) / 100000000 as SIGNED) AS min_mrktTotAmt " + " from stock1 "
+				+ "group by itmsNm, basDt,vs,fltRt,mkp,hipr,lopr " + " order by max_trqu " + Order_by + " limit " + limit_rank_number;
+
+		Statement stmt;
+		try {
+			stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+
+			System.out.printf("%-22s %-9s %-9s %-9s %-9s %-9s %-9s\t %-9s \t %-10s \n", "종목명", "날짜",  "대비", "등락률", "시가",
+					"고가", "저가", "거래량", "시가총액");
+
+			while (rs.next()) {
+				SelectUser(rs);
+			}
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+```
+</details>
+
+* 시가 총액과 거래량 기준 구분
+
+<details>
+    <summary>코드 보기</summary>
+
+```java
+//	거래량과 시가 총액에 대한 값 구분을 정하기 위한 메서드
+	public void SelectUser(ResultSet rs) {
+		try {
+
+			DecimalFormat formats = new DecimalFormat("#,##0원");
+
+			do {
+//				시가총액의 길이가 5이상은 단위가 조, 5이하면 억대
+				if (rs.getString(9).length() >= 5) {
+					// SQL에서 억 단위로 나눈 후 길이가 5이상이라면 조로 기준을 나눈다.
+//					거래량 : 1,000단위로 구분하고 거래량은 억단위인 기준
+					System.out.printf("%-20s %-12s %-8s %-9s %-9s %-9s %-9s %-9s\t %-15s\n", rs.getString(1),
+							rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6),
+							rs.getString(7), formats.format(Integer.parseInt(rs.getString(8))),
+//							0부터 1미만까지의 값을 1조로 설정
+							rs.getString(9).substring(0, rs.getString(9).length() - 4) + "조 "
+//							1부터 끝까지 : 1부터 시작 값의 끝까지는 억으로 
+									+ rs.getString(9).substring(rs.getString(9).length() - 4) + "억");
+				} else {
+					System.out.printf("%-20s %-12s %-8s %-9s %-9s %-9s %-9s %-9s\t %-15s\n", rs.getString(1),
+							rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6),
+							rs.getString(7), formats.format(Integer.parseInt(rs.getString(8))), rs.getString(9) + "억");
+				}
+			} while (rs.next());
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+```
+</details>
