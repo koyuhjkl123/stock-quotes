@@ -175,7 +175,11 @@
 
 | 종목명 검색 | 특정 날짜 검색 | 시가총액 검색 | 거래량 검색 |
 | --- | --- | --- | --- |
-| @Override
+| <details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
 	public void SqlSelect() {
 		System.out.println("---------- 주식시세정보 ----------");
 		System.out.print("1. 비 회원 이용자  |  2. 관리자");
@@ -304,6 +308,10 @@
 			} // while 끝
 		} // 관리자 2번 끝나는 행
 	} |
+```
+</details>
+
+
 
 | <details>
     <summary>코드 보기</summary>
