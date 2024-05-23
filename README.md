@@ -44,7 +44,8 @@
 <details>
     <summary>ERD</summary>
 
-![image](https://github.com/koyuhjkl123/stock-quotes/assets/94844952/753e50e5-a5aa-44e0-ad76-97c146e2b628)
+![image](https://github.com/koyuhjkl123/stock-quotes/assets/94844952/1fe20023-00f1-46d7-acf3-2776229f10e8)
+
 
 </details>
 
@@ -451,6 +452,172 @@ while (true) { // 5번 선택 시 끝남
 			e.printStackTrace();
 		}
 
+	}
+
+```
+</details>
+
+## 관리자 기능 구현
+* 관리자
+"**CRUD**" 추가하기, 조회하기, 수정하기, 삭제하기를 구현하였습니다. <br>
+
+**공공데이터 API를 활용한 DB 저장** <br>
+테이블 없을 시 생성 후 데이터 저장
+
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void Database() {
+//		API의 주소들의 저장소
+		String[] api_data = {
+//				코스닥 12월 1주차 ~ 4주차
+				"https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=B0n71QWQYKWw2A85EXRc5IQbV1P29e6lKpPlaefJZR4ls84%2BKV8HhzYR7pC6oK0wh0CUhKHZMR4z79CrhJhGUQ%3D%3D&numOfRows=150000&resultType=json&beginBasDt=20231204&endBasDt=20231211&mrktCls=KOSDAQ",
+				"https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=B0n71QWQYKWw2A85EXRc5IQbV1P29e6lKpPlaefJZR4ls84%2BKV8HhzYR7pC6oK0wh0CUhKHZMR4z79CrhJhGUQ%3D%3D&numOfRows=150000&resultType=json&beginBasDt=20231211&endBasDt=20231218&mrktCls=KOSDAQ",
+				"https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=B0n71QWQYKWw2A85EXRc5IQbV1P29e6lKpPlaefJZR4ls84%2BKV8HhzYR7pC6oK0wh0CUhKHZMR4z79CrhJhGUQ%3D%3D&numOfRows=150000&resultType=json&beginBasDt=20231218&endBasDt=20231225&mrktCls=KOSDAQ",
+				"https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo?serviceKey=B0n71QWQYKWw2A85EXRc5IQbV1P29e6lKpPlaefJZR4ls84%2BKV8HhzYR7pC6oK0wh0CUhKHZMR4z79CrhJhGUQ%3D%3D&numOfRows=150000&resultType=json&beginBasDt=20231225&endBasDt=20240101&mrktCls=KOSDAQ" };
+
+//		멀티스레드를 활용하기 위한 인터페이스 ExecutorService : 지정한 수만큼의 고정된 쓰레드풀을 생성
+		ExecutorService mutil_thread = Executors.newFixedThreadPool(api_data.length);
+//		데이터의 결과값을 저장한다.
+//		Future는 자바에서 비동기적인 작업의 결과를 나타내는 인터페이스
+//		비동기적인 작업은 작업이 완료될 때까지 기다리지 않고 다른 작업을 수행할 수 있도록 해주는 방식으로 동작
+//		Future는 작업의 현재 상태와 작업이 완료된 후 결과를 가져오는 메서드를 제공
+//		각 작업의 결과를 추적하기 위해 Future 사용
+		List<Future<String>> futures = new ArrayList<>();
+
+		// 각 API URL에 대해 Callable을 생성하고 executorService.submit()으로 제출합니다.
+		for (String api_datas : api_data) {
+//			callable은 Runnable과 유사 하지만 결과를 반환하고 예외를 던질 수 있는 점에서 차이있다
+//			allable은 하나의 call() 메서드를 정의하며, 이 메서드는 스레드에서 실행될 코드를 포함
+//			call() 메서드는 결과를 반환하거나 예외를 던질 수 있음
+//			call() 메서드가 반환하는 값은 Future 객체를 통해 얻을 수 있다.
+			Callable<String> apiCallTask = () -> AdminDatabase(api_datas);
+
+			// Callable을 mutil_thread에 제출하고 Futures를 리스트에 추가합니다.
+			futures.add(mutil_thread.submit(apiCallTask));
+		}
+
+		for (Future<String> future : futures) {
+
+			try {
+				String result = future.get();// 작업이 완료될 때까지 대기하고 결과를 얻음
+				Thread.sleep(200);
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		mutil_thread.shutdown(); // 종료하기
+	}
+	public synchronized boolean isTableExists(String table_name) {
+//		중복 테이블 검사
+
+//		테이블이 있으면 true, 없다면 false
+		DatabaseMetaData metadata;
+		try {
+			metadata = con.getMetaData();
+			ResultSet resultset = metadata.getColumns(null, null, table_name, null);
+
+			return resultset.next();
+		} catch (SQLException e) {
+			return false;
+		}
+
+	}
+
+//	스레드 전용 메서드
+	public synchronized String AdminDatabase(String api_data) {
+		String test = ""; // 가져온 데이터가 null이 아닌지 검사하기 위한 변수
+		StringBuilder result = new StringBuilder();
+		try {
+			URL url = new URL(api_data);
+			// 응답 형식을 JSON으로 설정
+			BufferedReader bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+
+			while ((test = bf.readLine()) != null) {
+				result.append(test);
+			}
+
+			JSONParser parser = new JSONParser();
+			JSONObject jsonObj = (JSONObject) parser.parse(result.toString());
+			JSONObject response = (JSONObject) jsonObj.get("response");
+			JSONObject body = (JSONObject) response.get("body");
+			JSONObject items = (JSONObject) body.get("items");
+			JSONArray item = (JSONArray) items.get("item");
+
+//			Stock1이라는 테이블 생성
+			String sql_create = "create table Stock1(" + "num int auto_increment not null primary key,"
+					+ "itmsNm VARCHAR(40) not null," + "basDt VARCHAR(40) not null," + "clpr VARCHAR(40) not null,"
+					+ "vs VARCHAR(40) not null," + "fltRt VARCHAR(40) not null," + "mkp VARCHAR(40) not null,"
+					+ "hipr VARCHAR(40) not null," + "lopr VARCHAR(40) not null," + "trqu VARCHAR(40) not null,"
+					+ "mrktTotAmt VARCHAR(40) not null)";
+
+			if (!isTableExists("Stock1")) { // 메서드 호출
+//					true : 테이블이 없을 때
+//		        	false : 테이블이 있을 때
+
+				try {
+					Statement stmt = con.createStatement();
+					stmt.executeUpdate(sql_create);
+					System.out.println("테이블 생성 완료");
+				} catch (Exception e) {
+					System.out.println("테이블이 중복되었습니다.");
+				}
+			}
+
+			for (int i = 0; i < item.size(); i++) {
+				JSONObject itmsNm = (JSONObject) item.get(i);
+				String itmsNms = (String) itmsNm.get("itmsNm"); // 종목명
+				String mrktTotAmt = (String) itmsNm.get("mrktTotAmt"); // 시가총액
+				String mrktCtg = (String) itmsNm.get("mrktCtg"); // 시장 구분
+				String clpr = (String) itmsNm.get("clpr"); // 종가
+				String basDt = (String) itmsNm.get("basDt"); // 기준일자
+				String vs = (String) itmsNm.get("vs"); // 대비
+				String fltRt = (String) itmsNm.get("fltRt"); // 등락률
+				String trqu = (String) itmsNm.get("trqu"); // 거래량
+				String mkp = (String) itmsNm.get("mkp"); // 시가
+				String hipr = (String) itmsNm.get("hipr"); // 고가
+				String lopr = (String) itmsNm.get("lopr"); // 저가
+
+//				api 데이터 가져온 값을 통해 set로 값을 저장
+				setItmsNms(itmsNms); setBasDt(basDt);
+				setClpr(clpr); setVs(vs);
+				setFltRt(fltRt); setMkp(mkp);
+				setHipr(hipr); setLopr(lopr);
+				setTrqu(trqu); setMrktTotAmt(mrktTotAmt);
+				System.out.print(itmsNms + "  " + basDt + "  " + clpr + "  " + vs + "  " + fltRt + "  " + mkp + "  "
+						+ hipr + "  " + lopr + " " + trqu + " " + mrktTotAmt + "\n"); // 날짜, 종가
+//				SQL INSERT문
+				String sql_insert = "insert into Stock1(itmsNm, basDt, clpr, vs, fltRt, mkp, hipr, lopr, trqu, mrktTotAmt) "
+						+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+//				set으로 저장한 값을 insert하여 해당 값을 반환
+				PreparedStatement pstmt = con.prepareStatement(sql_insert);
+				pstmt = con.prepareStatement(sql_insert);
+				pstmt.setString(1, getItmsNms()); // 종목명
+				pstmt.setString(2, getBasDt()); // 기준일자
+				pstmt.setString(3, getClpr()); // 종가
+				pstmt.setString(4, getVs()); // 대비
+				pstmt.setString(5, getFltRt()); // 등락률
+				pstmt.setString(6, getMkp()); // 시가
+				pstmt.setString(7, getHipr()); // 고가
+				pstmt.setString(8, getLopr()); // 저가
+				pstmt.setString(9, getTrqu()); // 거래량
+				pstmt.setString(10, getMrktTotAmt()); // 시가총액
+				int result_sum = pstmt.executeUpdate();
+
+				if (result_sum == 1) {
+					System.out.println("정보 업데이트 완료되었습니다.");
+				} else {
+					System.out.println("정보 업데이트 실패되었습니다.");
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return "데이터베이스";
 	}
 
 ```
