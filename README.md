@@ -715,3 +715,266 @@
 
 ```
 </details>
+
+
+| 추가하기 | 
+| --- |
+
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void AdminInsert() {
+		String sql = "insert into stock1(num, itmsNm, basDt, clpr, vs, fltRt, mkp, hipr, lopr, trqu, mrktTotAmt) "
+				+ "values(null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+		try {
+			PreparedStatement pstmt = con.prepareStatement(sql);
+
+			for (int i = 0; i < sql_insert.length; i++) {
+
+				System.out.println(sql_insert[i] + " : ");
+				switch (i) {
+				case 0:
+					setItmsNms(sc.next());
+					pstmt.setString(1, getItmsNms());
+					break;
+				case 1:
+					setBasDt(sc.next());
+					pstmt.setString(2, getBasDt());
+					break;
+				case 2:
+					setClpr(sc.next());
+					pstmt.setString(3, getClpr());
+					break;
+				case 3:
+					setVs(sc.next());
+					pstmt.setString(4, getVs());
+					break;
+				case 4:
+					setFltRt(sc.next());
+					pstmt.setString(5, getFltRt());
+					break;
+				case 5:
+					setMkp(sc.next());
+					pstmt.setString(6, getMkp());
+					break;
+				case 6:
+					setHipr(sc.next());
+					pstmt.setString(7, getHipr());
+					break;
+				case 7:
+					setLopr(sc.next());
+					pstmt.setString(8, getLopr());
+					break;
+				case 8:
+					setTrqu(sc.next());
+					pstmt.setString(9, getTrqu());
+					break;
+				case 9:
+					setMrktTotAmt(sc.next());
+					pstmt.setString(10, getMrktTotAmt());
+					break;
+				}
+			}
+
+			int result = pstmt.executeUpdate();
+
+			if (result == 1) {
+				System.out.println("정보 업데이트가 완료 되었습니다.");
+			} else {
+				System.out.println("정보 업데이트가 실패 하였습니다.");
+			}
+			pstmt.close();
+		} catch (SQLException e) {
+			System.out.println("해당 정보가 잘못되어 insert에 실패하였습니다.");
+			e.printStackTrace();
+		}
+
+	}
+
+```
+</details>
+
+| 조회하기 | 
+| --- |
+
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void AdminSelect() {
+
+		System.out.println("원하시는 검색하실 컬럼을 선택하세요");
+		String sql = "SELECT itmsNm, basDt, clpr, vs, fltRt, mkp, hipr, lopr, trqu, "
+				+ "       CAST(MAX(CAST(mrktTotAmt AS SIGNED)) / 100000000 AS SIGNED) AS min_mrktTotAmt "
+				+ "FROM stock1 "
+				+ "GROUP BY itmsNm, basDt, clpr, vs, fltRt, mkp, hipr, lopr, trqu "
+				+ "LIMIT 100;";
+
+		int[] admin_column = new int[11]; // SQL 컬럼의 수
+		boolean[] admin_column_is = new boolean[11]; // 선택된 값은 true
+
+		for (int i = 0; i < sql_insert.length; i++) {
+			System.out.print("1. 종목명 2. 날짜 3. 종가 4. 대비 5. 등락률\n");
+			System.out.print("6. 시가  7. 고가  8. 저가  9. 거래량  10. 시가총액\n");
+			System.out.println(" '0' 을 입력하시면 선택 종료됩니다. ");
+
+			int input = sc.nextInt(); // 관리자 원하는 컬럼을 검색을 하기 위한
+
+			if (input == 0) { // 0이면 종료
+				break;
+			}
+//			선택지에 없는 번호를 입력 시 
+			if (input < 1 || input > 10) {
+				System.out.println("잘못 입력한 번호이며, 다시 입력하시길 바랍니다.");
+				i--;
+				continue;
+			}
+//			선택지 중복 체크
+			if (admin_column_is[input]) {
+				System.out.println("선택하신 해당 메뉴는 중복된 정보입니다.");
+				System.out.println("다시 입력하시길 바랍니다.");
+				i--;
+				continue;
+			}
+			admin_column[i] = input; // 선택한 번호는 배열에 넣는다
+			if (input != 0) {
+				admin_column_is[input] = true; // 해당 번호에 불리언 배열에 true
+			}
+			
+		} // for문 끝나는 부분
+		try {
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+			for(int i=1; i <= sql_insert.length; i++) {
+				
+				if(admin_column_is[i]) { // 1부터 ~ 10까지의 true있는 컬럼
+//					0부터 9까지의 컬럼을 추출
+					System.out.print(sql_insert[i-1] +" \t");
+				}
+			}
+			System.out.println();  // 헤더 출력 후 줄바꿈
+			
+			DecimalFormat formats = new DecimalFormat("#,##0원");
+			while (rs.next()) {
+			    for (int i = 1; i <= sql_insert.length; i++) {
+			        if (admin_column_is[i]) {
+			        	if(i == 9) { // i가 9번은 거래량
+//			        		거래량을 #,##0원으로 format
+			        		String trqu = rs.getString(i); // 거래량의 값을 trqu변수에 대입
+//			        		문자열 거래량을 Double타입을 변환한 후 출력
+			                System.out.print(formats.format(Double.parseDouble(trqu)) + "\t");
+			        	}else if (i == 10) { // 10은 시가총액 : 
+			                String mrktTotAmt = rs.getString(i); // i번째 값을 mrktTotAmt 변수에 대입
+			                if (mrktTotAmt.length() >= 5) { // 시가총액의 길이 5이상이면 예) 1조 4005억
+			                    System.out.print(mrktTotAmt.substring(0, mrktTotAmt.length() - 4) + "조 " +
+			                            mrktTotAmt.substring(mrktTotAmt.length() - 4) + "억\t");
+			                } else { // 길이 5이하라면 4005억
+			                    System.out.print(mrktTotAmt + "억\t");
+			                }
+			            } else { // i가 9, 10도 아니라면 그냥 출력
+			                System.out.print(rs.getString(i) + "\t");
+			            }
+			        }
+			    }
+			    System.out.println();  // 한 행 출력이 끝날 때마다 줄바꿈
+			}
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+```
+</details>
+
+| 수정하기 | 
+| --- |
+
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void AdminUdate() {
+		String sql = "update stock1 set trqu = ?" + " where itmsNm = ? and basDt = ?";
+
+		try {
+			PreparedStatement pstmt = con.prepareStatement(sql);
+
+			System.out.println("변경할 거래량을 입력하세요 : ");
+			setTrqu(sc.next());
+
+//			종목명, 날짜를 입력해서 변경할 거래량을 입력한다.
+			System.out.println("거래량을 변경할 종목명을 입력하세요 : ");
+			setItmsNms(sc.next());
+
+			System.out.println("날짜를 입력하세요 : 예) 20231212 ");
+			setBasDt(sc.next());
+
+			pstmt.setString(1, getTrqu());
+			pstmt.setString(2, getItmsNms());
+			pstmt.setString(3, getBasDt());
+
+			int result = pstmt.executeUpdate();
+
+			if (result == 1) {
+				System.out.println("관리자님 요청하신 데이터 변경 완료 하였습니다.");
+			} else {
+				System.out.println("관리자님 요청하신 데이터 변경 실패 되었습니다.");
+			}
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+```
+</details>
+
+| 삭제하기 | 
+| --- |
+
+<details>
+    <summary>코드 보기</summary>
+
+```java
+@Override
+	public void AdminDelete() {
+		String sql = "delete from stock1 where basDt = ? and itmsNm = ?";
+
+		try {
+			PreparedStatement pstmt = con.prepareStatement(sql);
+
+			String date = ""; // 날짜
+			String itmsNm = ""; // 종목명
+
+			System.out.println("삭제 조건 : 날짜, 종목명을 입력하셔야합니다.");
+			System.out.println("날짜를 입력하세요 : ");
+			date = sc.next();
+			System.out.println("종목명을 입력하세요 :");
+			itmsNm = sc.next();
+
+			pstmt.setString(1, date);
+			pstmt.setString(2, itmsNm);
+
+			int result = pstmt.executeUpdate();
+
+			if (result == 1) {
+				System.out.println("해당 데이터가 삭제 완료 되었습니다");
+			} else {
+				System.out.println("해당 데이터가 삭제 실패 하였습니다.");
+			}
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+```
+</details>
